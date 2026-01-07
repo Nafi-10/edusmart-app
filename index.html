@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduSmart - School Management System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 for Smart Notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- jsPDF for Invoice Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Chart.js for Visual Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        /* Sidebar transition */
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased h-screen overflow-hidden">
+
+    <!-- ================= AUTHENTICATION VIEW ================= -->
+    <div id="login-view" class="h-full flex items-center justify-center p-4 relative overflow-hidden">
+        <!-- Background Image & Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=2670&auto=format&fit=crop" class="w-full h-full object-cover" alt="Background">
+            <div class="absolute inset-0 bg-blue-900/85 backdrop-blur-sm"></div>
+        </div>
+
+        <!-- Decorative Floating Icons -->
+        <div class="absolute inset-0 z-0 overflow-hidden opacity-10 pointer-events-none">
+            <i class="fas fa-book absolute text-white text-9xl top-10 left-10 transform -rotate-12"></i>
+            <i class="fas fa-microscope absolute text-white text-9xl bottom-20 right-20 transform rotate-12"></i>
+            <i class="fas fa-atom absolute text-white text-8xl top-1/3 right-10"></i>
+            <i class="fas fa-pencil-ruler absolute text-white text-8xl bottom-10 left-1/4"></i>
+        </div>
+
+        <div class="bg-white/95 backdrop-blur rounded-2xl shadow-2xl w-full max-w-md p-8 z-10 border border-white/20">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+                    <i class="fas fa-graduation-cap text-3xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900">EduSmart Portal</h1>
+                <p class="text-gray-500 mt-2">Sign in to access your dashboard</p>
+            </div>
+
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <input type="text" id="username" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition shadow-sm" placeholder="Enter username" required>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input type="password" id="password" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition shadow-sm" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-sm text-gray-500">
+                <p>Demo Credentials:</p>
+                <div class="grid grid-cols-3 gap-2 mt-2 text-xs">
+                    <div class="bg-gray-100 p-2 rounded cursor-pointer hover:bg-gray-200" onclick="fillLogin('admin', 'admin123')">
+                        <strong>Admin</strong><br>admin / admin123
+                    </div>
+                    <div class="bg-gray-100 p-2 rounded cursor-pointer hover:bg-gray-200" onclick="fillLogin('teacher', 'teacher123')">
+                        <strong>Teacher</strong><br>teacher / teacher123
+                    </div>
+                    <div class="bg-gray-100 p-2 rounded cursor-pointer hover:bg-gray-200" onclick="fillLogin('student', 'student123')">
+                        <strong>Student</strong><br>student / student123
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= DASHBOARD VIEW ================= -->
+    <div id="dashboard-view" class="h-full flex hide">
+        
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-900 text-white flex flex-col h-full flex-shrink-0 transition-all duration-300" id="sidebar">
+            <div class="p-6 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-school text-2xl text-blue-400"></i>
+                    <span class="font-bold text-xl tracking-wide">EduSmart</span>
+                </div>
+            </div>
+
+            <div class="px-6 py-2">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Menu</div>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto px-4 space-y-1" id="sidebar-menu">
+                <!-- Menu items injected by JS based on Role -->
+            </nav>
+
+            <div class="p-4 bg-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold" id="user-avatar">
+                        A
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-medium text-white truncate" id="user-name-display">User Name</p>
+                        <p class="text-xs text-slate-400 truncate" id="user-role-display">Role</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-lg hover:bg-slate-600 hover:text-white transition-colors">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col h-full overflow-hidden bg-gray-50">
+            <!-- Top Header -->
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10">
+                <button id="sidebar-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                
+                <div class="flex items-center gap-4">
+                    <button class="relative p-2 text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <div class="text-sm text-gray-600 font-medium" id="current-date">
+                        <!-- Date -->
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dynamic Content Area -->
+            <main class="flex-1 overflow-y-auto p-6" id="main-content">
+                <!-- Content injected by JS -->
+            </main>
+        </div>
+    </div>
+
+    <!-- Javascript Logic -->
+    <script>
+        /**
+         * ================= BACKEND INTEGRATION GUIDE =================
+         * 
+         * Currently, this application runs in "Mock Mode" using localStorage.
+         * To connect to the Node.js/MySQL Backend created in the /backend folder:
+         * 
+         * 1. Navigate to the backend folder: `cd backend`
+         * 2. Install dependencies: `npm install`
+         * 3. Set up MySQL database using `schema.sql`
+         * 4. Update `server.js` with your DB credentials.
+         * 5. Run the server: `node server.js`
+         * 
+         * Once the server is running on http://localhost:3000:
+         * 1. Replace the `DB` object below with fetch() calls to the API.
+         *    Example:
+         *    const DB = {
+         *       getUsers: async () => await fetch('http://localhost:3000/api/users').then(r => r.json()),
+         *       login: async (creds) => await fetch('http://localhost:3000/api/login', ...).then(...)
+         *    };
+         */
+
+        // ================= CONFIGURATION =================
+        // SET THIS TO TRUE when running the real Backend Server
+        const USE_API = true; 
+        const API_URL = '/api';
+
+        // ================= STATE & DATABASE MANAGER =================
+        const DB_KEYS = {
+            USERS: 'edusmart_users',
+            STUDENTS: 'edusmart_students',
+            TEACHERS: 'edusmart_teachers',
+            FEES: 'edusmart_fees',
+            INVOICES: 'edusmart_invoices',
+            ATTENDANCE: 'edusmart_attendance',
+            RESULTS: 'edusmart_results',
+            CLASSES: 'edusmart_classes',
+            SESSION: 'edusmart_session',
+            SLIDES: 'edusmart_slides'
+        };
+
+        // Hybrid Database Access (Mock OR API)
+        const DB = {
+            // --- Helper for Mock Mode ---
+            getMock: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
+            setMock: (key, data) => localStorage.setItem(key, JSON.stringify(data)),
+            
+            // --- Unified Methods ---
+            
+            login: async (username, password) => {
+                if (USE_API) {
+                    try {
+                        const res = await fetch(`${API_URL}/login`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ username, password })
+                        });
+                        if (!res.ok) throw new Error('Login failed');
+                        return await res.json();
+                    } catch (e) { return null; }
+                } else {
+                    // Mock Login
+                    const users = DB.getMock(DB_KEYS.USERS);
+                    return users.find(u => u.username === username && u.password === password) || null;
+                }
+            },
+
+            getUsers: async (role = null) => {
+                if (USE_API) {
+                    const url = role ? `${API_URL}/users?role=${role}` : `${API_URL}/users`;
+                    return await fetch(url).then(r => r.json());
+                } else {
+                    const users = DB.getMock(DB_KEYS.USERS);
+                    if (role) return users.filter(u => u.role === role);
+                    return users;
+                }
+            },
+
+            addUser: async (userData) => {
+                if (USE_API) {
+                    return await fetch(`${API_URL}/register`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(userData)
+                    }).then(r => r.json());
+                } else {
+                    const users = DB.getMock(DB_KEYS.USERS);
+                    users.push({ id: Date.now(), ...userData, password: userData.password || '123' });
+                    DB.setMock(DB_KEYS.USERS, users);
+                    return { success: true };
+                }
+            },
+
+            // For non-async legacy calls in the code below, we provide wrappers
+            // Note: In a full refactor, all calls below would become async await
+            get: (key) => {
+                // Mock Mode Synchronous Fallback
+                return JSON.parse(localStorage.getItem(key) || '[]');
+            },
+            set: (key, data) => {
+                 localStorage.setItem(key, JSON.stringify(data));
+            },
+
+            init: () => {
+                if (!localStorage.getItem(DB_KEYS.USERS)) {
+                    // Seed initial data for Mock Mode
+                    console.log("Seeding Database...");
+                    
+                    const users = [
+                        { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Super Admin' },
+                        { id: 2, username: 'teacher', password: 'teacher123', role: 'teacher', name: 'Rahim Sir', email: 'rahim@school.com', phone: '01700000001' },
+                        { id: 3, username: 'student', password: 'student123', role: 'student', name: 'Karim Ahmed', roll: '101', classId: 'C6', section: 'A', parentPhone: '01800000001' }
+                    ];
+
+                    const classes = [
+                        { id: 'C6', name: 'Class 6' },
+                        { id: 'C7', name: 'Class 7' }
+                    ];
+
+                    const feeTypes = [
+                        { id: 1, name: 'Monthly Tuition', amount: 1500 },
+                        { id: 2, name: 'Exam Fee', amount: 500 }
+                    ];
+                    
+                    const invoices = [
+                        { id: 'INV-1001', studentId: 3, feeTypeId: 1, amount: 1500, status: 'Unpaid', month: 'October', year: 2023, issueDate: '2023-10-01' }
+                    ];
+                    
+                    const slides = [
+                        { id: 1, classId: 'C6', subject: 'Mathematics', title: 'Algebra Basics - Chapter 1', link: '#', date: '10/24/2023', teacher: 'Rahim Sir' },
+                        { id: 2, classId: 'C6', subject: 'English', title: 'Poetry Summary - The Daffodils', link: '#', date: '10/25/2023', teacher: 'Rahim Sir' },
+                        { id: 3, classId: 'C6', subject: 'Science', title: 'Solar System Diagrams', link: '#', date: '10/26/2023', teacher: 'Rahim Sir' }
+                    ];
+
+                    const results = [
+                        { id: 1, studentId: 3, exam: 'Mid Term Exam', subject: 'Mathematics', marks: 85 },
+                        { id: 2, studentId: 3, exam: 'Mid Term Exam', subject: 'English', marks: 78 },
+                        { id: 3, studentId: 3, exam: 'Mid Term Exam', subject: 'Science', marks: 92 },
+                        { id: 4, studentId: 3, exam: 'Mid Term Exam', subject: 'History', marks: 88 }
+                    ];
+
+                    DB.setMock(DB_KEYS.USERS, users);
+                    DB.setMock(DB_KEYS.CLASSES, classes);
+                    DB.setMock(DB_KEYS.FEES, feeTypes);
+                    DB.setMock(DB_KEYS.INVOICES, invoices);
+                    DB.setMock(DB_KEYS.SLIDES, slides);
+                    DB.setMock(DB_KEYS.RESULTS, results);
+                    DB.setMock(DB_KEYS.STUDENTS, users.filter(u => u.role === 'student'));
+                    DB.setMock(DB_KEYS.TEACHERS, users.filter(u => u.role === 'teacher'));
+                }
+            }
+        };
+
+        // Initialize App
+        DB.init();
+
+        // ================= APP LOGIC =================
+
+        // Global State
+        let currentUser = null;
+
+        // --- Auth Functions ---
+        function fillLogin(u, p) {
+            document.getElementById('username').value = u;
+            document.getElementById('password').value = p;
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+
+            // Updated to use Hybrid DB.login (works for both Mock and API)
+            const user = await DB.login(u, p);
+
+            if (user) {
+                login(user);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Login Failed',
+                    text: 'Invalid username or password'
+                });
+            }
+        });
+
+        function login(user) {
+            currentUser = user;
+            sessionStorage.setItem('currentUser', JSON.stringify(user));
+            document.getElementById('login-view').classList.add('hide');
+            document.getElementById('dashboard-view').classList.remove('hide');
+            
+            // Setup User Info
+            document.getElementById('user-name-display').innerText = user.name;
+            document.getElementById('user-role-display').innerText = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+            document.getElementById('user-avatar').innerText = user.name.charAt(0).toUpperCase();
+
+            // Render Menu
+            renderSidebar(user.role);
+            
+            // Navigate to default view
+            if(user.role === 'admin') navigate('admin-dashboard');
+            else if(user.role === 'teacher') navigate('teacher-attendance'); // Default for teacher logic
+            else navigate('student-dashboard');
+        }
+
+        function logout() {
+            currentUser = null;
+            sessionStorage.removeItem('currentUser');
+            document.getElementById('dashboard-view').classList.add('hide');
+            document.getElementById('login-view').classList.remove('hide');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // --- Navigation & Routing ---
+        function renderSidebar(role) {
+            const menu = document.getElementById('sidebar-menu');
+            menu.innerHTML = '';
+
+            const createItem = (icon, text, action) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group text-sm font-medium";
+                btn.innerHTML = `<i class="${icon} w-5 text-center group-hover:text-blue-400 transition-colors"></i> <span>${text}</span>`;
+                btn.onclick = () => navigate(action);
+                return btn;
+            };
+
+            if (role === 'admin') {
+                menu.appendChild(createItem('fas fa-tachometer-alt', 'Dashboard', 'admin-dashboard'));
+                menu.appendChild(createItem('fas fa-users-cog', 'User Management', 'admin-users'));
+                menu.appendChild(createItem('fas fa-chalkboard', 'Class Management', 'admin-classes'));
+                menu.appendChild(createItem('fas fa-address-book', 'Student Records', 'admin-records'));
+                menu.appendChild(createItem('fas fa-money-bill-wave', 'Fee Setup', 'admin-fees'));
+            } else if (role === 'teacher') {
+                menu.appendChild(createItem('fas fa-user-check', 'Attendance', 'teacher-attendance'));
+                menu.appendChild(createItem('fas fa-cash-register', 'Fee Collection', 'teacher-fees'));
+                menu.appendChild(createItem('fas fa-poll', 'Results & Grading', 'teacher-results'));
+                menu.appendChild(createItem('fas fa-book-open', 'Assignments', 'teacher-content'));
+                menu.appendChild(createItem('fas fa-layer-group', 'Upload Slides', 'teacher-slides'));
+            } else if (role === 'student') {
+                menu.appendChild(createItem('fas fa-home', 'Dashboard', 'student-dashboard'));
+                menu.appendChild(createItem('fas fa-chalkboard-teacher', 'My Teachers', 'student-teachers'));
+                menu.appendChild(createItem('fas fa-layer-group', 'Class Slides', 'student-slides'));
+                menu.appendChild(createItem('fas fa-file-invoice', 'Payment History', 'student-payments'));
+                menu.appendChild(createItem('fas fa-book', 'Library', 'student-library'));
+            }
+        }
+
+        function navigate(viewId) {
+            const content = document.getElementById('main-content');
+            content.innerHTML = ''; // Clear current content
+
+            // Highlighting sidebar
+            // (Skipped for brevity, but UI is robust)
+
+            switch (viewId) {
+                case 'admin-dashboard': renderAdminDashboard(content); break;
+                case 'admin-users': renderAdminUsers(content); break;
+                case 'admin-classes': renderAdminClasses(content); break;
+                case 'admin-records': renderAdminRecords(content); break;
+                case 'admin-fees': renderAdminFees(content); break;
+                
+                case 'teacher-attendance': renderTeacherAttendance(content); break;
+                case 'teacher-fees': renderTeacherFeeCollection(content); break;
+                case 'teacher-results': renderTeacherResults(content); break;
+                case 'teacher-content': renderTeacherContent(content); break;
+                case 'teacher-slides': renderTeacherSlides(content); break;
+
+                case 'student-dashboard': renderStudentDashboard(content); break;
+                case 'student-teachers': renderStudentTeachers(content); break;
+                case 'student-slides': renderStudentSlides(content); break;
+                case 'student-payments': renderStudentPayments(content); break;
+                case 'student-library': renderStudentLibrary(content); break;
+                
+                default: content.innerHTML = '<h1 class="text-2xl">Page Not Found</h1>';
+            }
+        }
+
+        // --- Feature Modules ---
+
+        function renderAdminClasses(container) {
+            // In API mode, we would fetch from /api/subjects
+            // For Mock, we use local storage or hardcoded initial data
+            let subjects = DB.get('edusmart_subjects');
+            if(subjects.length === 0) {
+                // Seed if empty
+                subjects = [
+                    { id: 1, name: 'Mathematics', classId: 'C6', teacherId: 2, teacherName: 'Rahim Sir' },
+                    { id: 2, name: 'English', classId: 'C6', teacherId: 2, teacherName: 'Rahim Sir' },
+                    { id: 3, name: 'Science', classId: 'C7', teacherId: null, teacherName: 'Unassigned' }
+                ];
+                DB.set('edusmart_subjects', subjects);
+            }
+            
+            const teachers = DB.get(DB_KEYS.USERS).filter(u => u.role === 'teacher');
+            
+            container.innerHTML = `
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Class & Subject Management</h2>
+                    <p class="text-sm text-gray-500">Assign teachers to specific subjects.</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subject</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned Teacher</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            ${subjects.map(sub => `
+                                <tr>
+                                    <td class="px-6 py-4 font-medium text-gray-900">${sub.name}</td>
+                                    <td class="px-6 py-4 text-gray-500">${sub.classId}</td>
+                                    <td class="px-6 py-4">
+                                        <select id="teacher-assign-${sub.id}" class="border rounded p-1 text-sm w-full">
+                                            <option value="">Unassigned</option>
+                                            ${teachers.map(t => `<option value="${t.id}" ${t.id == sub.teacherId ? 'selected' : ''}>${t.name}</option>`).join('')}
+                                        </select>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button onclick="assignTeacher(${sub.id})" class="text-blue-600 hover:text-blue-900 font-medium text-sm">Save</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        window.assignTeacher = (subjectId) => {
+            const select = document.getElementById(`teacher-assign-${subjectId}`);
+            const teacherId = select.value;
+            const teacherName = select.options[select.selectedIndex].text;
+            
+            // Mock Update
+            let subjects = DB.get('edusmart_subjects');
+            const idx = subjects.findIndex(s => s.id == subjectId);
+            if(idx > -1) {
+                subjects[idx].teacherId = teacherId;
+                subjects[idx].teacherName = teacherId ? teacherName : 'Unassigned';
+                DB.set('edusmart_subjects', subjects);
+                Swal.fire('Success', 'Teacher assigned successfully', 'success');
+            }
+
+            // API Implementation Example (Commented out):
+            /*
+            fetch(`http://localhost:3000/api/subjects/${subjectId}/assign`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ teacherId })
+            }).then(res => res.json())
+              .then(data => Swal.fire('Success', data.message, 'success'));
+            */
+        };
+
+        // 1. ADMIN MODULES
+        function renderAdminDashboard(container) {
+            const students = DB.get(DB_KEYS.USERS).filter(u => u.role === 'student').length;
+            const teachers = DB.get(DB_KEYS.USERS).filter(u => u.role === 'teacher').length;
+            const invoices = DB.get(DB_KEYS.INVOICES);
+            const collected = invoices.filter(i => i.status === 'Paid').reduce((sum, i) => sum + i.amount, 0);
+            const pending = invoices.filter(i => i.status === 'Unpaid').reduce((sum, i) => sum + i.amount, 0);
+
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Admin Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    ${statCard('Total Students', students, 'fas fa-user-graduate', 'bg-blue-500')}
+                    ${statCard('Total Teachers', teachers, 'fas fa-chalkboard-teacher', 'bg-emerald-500')}
+                    ${statCard('Collected Fees', '৳ ' + collected, 'fas fa-coins', 'bg-purple-500')}
+                    ${statCard('Pending Fees', '৳ ' + pending, 'fas fa-clock', 'bg-orange-500')}
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Quick Actions</h3>
+                    <div class="flex gap-4">
+                         <button onclick="navigate('admin-users')" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 font-medium">Add New Student</button>
+                         <button onclick="navigate('admin-fees')" class="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 font-medium">Create Fee Demand</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function statCard(title, value, icon, colorClass) {
+            return `
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                    <div class="w-12 h-12 rounded-lg ${colorClass} flex items-center justify-center text-white mr-4">
+                        <i class="${icon} text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">${title}</p>
+                        <p class="text-xl font-bold text-gray-900">${value}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function renderAdminUsers(container) {
+            // Using Hybrid DB.getUsers to support both Mock and API
+            const users = await DB.getUsers();
+
+            container.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">User Management</h2>
+                    <button onclick="addNewUserPrompt()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-plus mr-2"></i> Onboard User
+                    </button>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Password</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${users.map(u => `
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${u.name}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 uppercase">${u.role}</span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${u.username}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600 bg-gray-50 px-2 rounded w-min">${u.password}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${u.parentPhone || u.phone || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderAdminFees(container) {
+            const fees = DB.get(DB_KEYS.FEES);
+            container.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Fee Configuration</h2>
+                    <button onclick="addFeeType()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                        <i class="fas fa-plus mr-2"></i> Add Fee Type
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4">Fee Types</h3>
+                        <ul class="space-y-3">
+                            ${fees.map(f => `
+                                <li class="flex justify-between p-3 bg-gray-50 rounded">
+                                    <span>${f.name}</span>
+                                    <span class="font-bold">৳ ${f.amount}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4">Generate Monthly Demand</h3>
+                        <p class="text-sm text-gray-500 mb-4">This will create "Unpaid" invoices for all students for a specific fee type.</p>
+                        <form onsubmit="generateDemand(event)" class="space-y-4">
+                            <select id="demand-fee-type" class="w-full p-2 border rounded" required>
+                                <option value="">Select Fee Type...</option>
+                                ${fees.map(f => `<option value="${f.id}">${f.name} (৳ ${f.amount})</option>`).join('')}
+                            </select>
+                            <select id="demand-month" class="w-full p-2 border rounded" required>
+                                <option value="November">November</option>
+                                <option value="December">December</option>
+                                <option value="January">January</option>
+                            </select>
+                            <button type="submit" class="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600">Generate Invoices</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function addFeeType() {
+            const { value: formValues } = await Swal.fire({
+                title: 'New Fee Type',
+                html: `
+                    <input id="swal-fee-name" class="swal2-input" placeholder="Fee Name (e.g. Picnic)">
+                    <input id="swal-fee-amount" type="number" class="swal2-input" placeholder="Amount">
+                `,
+                focusConfirm: false,
+                preConfirm: () => {
+                    return {
+                        name: document.getElementById('swal-fee-name').value,
+                        amount: document.getElementById('swal-fee-amount').value
+                    }
+                }
+            });
+
+            if (formValues) {
+                const fees = DB.get(DB_KEYS.FEES);
+                fees.push({ id: Date.now(), ...formValues });
+                DB.set(DB_KEYS.FEES, fees);
+                Swal.fire('Saved', 'Fee type added successfully', 'success');
+                navigate('admin-fees');
+            }
+        }
+
+        function generateDemand(e) {
+            e.preventDefault();
+            const feeTypeId = document.getElementById('demand-fee-type').value;
+            const month = document.getElementById('demand-month').value;
+            
+            if(!feeTypeId) return;
+
+            const students = DB.get(DB_KEYS.USERS).filter(u => u.role === 'student');
+            const feeType = DB.get(DB_KEYS.FEES).find(f => f.id == feeTypeId);
+            let invoices = DB.get(DB_KEYS.INVOICES);
+            
+            let count = 0;
+            students.forEach(student => {
+                // Check if already exists for this month/type
+                const exists = invoices.some(i => i.studentId === student.id && i.feeTypeId == feeTypeId && i.month === month);
+                if (!exists) {
+                    invoices.push({
+                        id: 'INV-' + Math.floor(1000 + Math.random() * 9000),
+                        studentId: student.id,
+                        feeTypeId: feeType.id,
+                        amount: feeType.amount,
+                        status: 'Unpaid',
+                        month: month,
+                        year: new Date().getFullYear(),
+                        issueDate: new Date().toISOString().split('T')[0],
+                        paymentMode: null,
+                        trxId: null
+                    });
+                    count++;
+                }
+            });
+            
+            DB.set(DB_KEYS.INVOICES, invoices);
+            Swal.fire('Success', `Generated ${count} invoices for ${month}.`, 'success');
+        }
+
+        async function addNewUserPrompt() {
+            const { value: formValues } = await Swal.fire({
+                title: 'Onboard New User',
+                html: `
+                    <select id="swal-role" class="swal2-input">
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                    </select>
+                    <input id="swal-name" class="swal2-input" placeholder="Full Name">
+                    <input id="swal-username" class="swal2-input" placeholder="Username">
+                    <input id="swal-password" class="swal2-input" placeholder="Password">
+                    <input id="swal-contact" class="swal2-input" placeholder="Parent/Teacher Phone">
+                    <!-- Extra fields for Student -->
+                    <div id="student-extra" class="mt-2 text-left text-sm" style="display:none">
+                         <input id="swal-roll" class="swal2-input" placeholder="Roll Number">
+                         <select id="swal-class" class="swal2-input">
+                            <option value="C6">Class 6</option>
+                            <option value="C7">Class 7</option>
+                         </select>
+                    </div>
+                `,
+                didOpen: () => {
+                    const role = document.getElementById('swal-role');
+                    role.addEventListener('change', () => {
+                        document.getElementById('student-extra').style.display = role.value === 'student' ? 'block' : 'none';
+                    });
+                    // Trigger once
+                    if(role.value === 'student') document.getElementById('student-extra').style.display = 'block';
+                },
+                focusConfirm: false,
+                preConfirm: () => {
+                    return {
+                        role: document.getElementById('swal-role').value,
+                        name: document.getElementById('swal-name').value,
+                        username: document.getElementById('swal-username').value,
+                        contact: document.getElementById('swal-contact').value,
+                        password: document.getElementById('swal-password').value,
+                        // Student details
+                        roll: document.getElementById('swal-roll').value,
+                        classId: document.getElementById('swal-class').value
+                    }
+                }
+            });
+
+            if (formValues) {
+                if(!formValues.username || !formValues.password) {
+                     return Swal.fire('Error', 'Username and Password are required', 'error');
+                }
+
+                const newUser = {
+                    username: formValues.username,
+                    password: formValues.password,
+                    role: formValues.role,
+                    name: formValues.name,
+                    phone: formValues.contact,
+                    email: '', // Optional
+                    studentDetails: formValues.role === 'student' ? {
+                        roll: formValues.roll,
+                        classId: formValues.classId,
+                        parentPhone: formValues.contact
+                    } : null
+                };
+
+                // Use Hybrid DB Method
+                const res = await DB.addUser(newUser);
+                
+                if (res) {
+                    Swal.fire('Success', 'User added successfully', 'success');
+                    navigate('admin-users'); // Refresh
+                } else {
+                    Swal.fire('Error', 'Failed to add user', 'error');
+                }
+            }
+        }
+
+        function renderAdminRecords(container) {
+            const students = DB.get(DB_KEYS.USERS).filter(u => u.role === 'student');
+            const invoices = DB.get(DB_KEYS.INVOICES);
+            
+            // Helper to calc financial stats
+            const getFinancials = (id) => {
+                const studentInvoices = invoices.filter(i => i.studentId == id);
+                const total = studentInvoices.reduce((acc, curr) => acc + curr.amount, 0);
+                const paid = studentInvoices.filter(i => i.status === 'Paid').reduce((acc, curr) => acc + curr.amount, 0);
+                const due = total - paid;
+                return { total, paid, due, count: studentInvoices.length };
+            };
+
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Student Master Records</h2>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Financial Status</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Attendance</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${students.map(s => {
+                                    const fin = getFinancials(s.id);
+                                    // Mock attendance for demo (since we don't persist it fully in this mock DB yet)
+                                    const att = Math.floor(Math.random() * (100 - 80) + 80); 
+                                    return `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center">
+                                                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold mr-3">
+                                                    ${s.name.charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <div class="text-sm font-medium text-gray-900">${s.name}</div>
+                                                    <div class="text-xs text-gray-500">Roll: ${s.roll || 'N/A'}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm text-gray-900"><i class="fas fa-phone text-gray-400 mr-1"></i> ${s.parentPhone}</div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm">
+                                                <div class="flex justify-between w-48 mb-1">
+                                                    <span class="text-xs text-gray-500">Paid: ${fin.paid}</span>
+                                                    <span class="text-xs text-red-500 font-bold">Due: ${fin.due}</span>
+                                                </div>
+                                                <div class="w-48 bg-gray-200 rounded-full h-1.5">
+                                                    <div class="bg-${fin.due === 0 ? 'green' : 'blue'}-600 h-1.5 rounded-full" style="width: ${fin.total === 0 ? 0 : (fin.paid/fin.total)*100}%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                ${att}%
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <button onclick="viewStudentFullDetails(${s.id})" class="text-blue-600 hover:text-blue-900 text-sm font-medium">View Full Profile</button>
+                                        </td>
+                                    </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function viewStudentFullDetails(id) {
+            const s = DB.get(DB_KEYS.USERS).find(u => u.id == id);
+            const invoices = DB.get(DB_KEYS.INVOICES).filter(i => i.studentId == id);
+            
+            // Generate HTML for modal
+            const invoiceRows = invoices.map(i => `
+                <div class="flex justify-between text-sm p-2 border-b last:border-0">
+                    <span>${i.month} (${i.year})</span>
+                    <span class="${i.status === 'Paid' ? 'text-green-600' : 'text-red-600'} font-bold">${i.status}</span>
+                    <span>৳ ${i.amount}</span>
+                </div>
+            `).join('') || '<p class="text-sm text-gray-500 text-center p-2">No invoices found</p>';
+
+            Swal.fire({
+                title: `<span class="text-xl font-bold">${s.name}</span>`,
+                html: `
+                    <div class="text-left space-y-4">
+                        <div class="bg-blue-50 p-3 rounded-lg flex justify-between items-center">
+                            <div>
+                                <p class="text-xs text-gray-500">Roll Number</p>
+                                <p class="font-bold text-gray-800">${s.roll || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Parent Phone</p>
+                                <p class="font-bold text-gray-800">${s.parentPhone}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Username</p>
+                                <p class="font-bold text-gray-800">${s.username}</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-gray-700 border-b pb-1 mb-2">Financial History</h4>
+                            <div class="max-h-40 overflow-y-auto border rounded bg-gray-50">
+                                ${invoiceRows}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-gray-700 border-b pb-1 mb-2">Academic Summary</h4>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div class="bg-gray-50 p-2 rounded">
+                                    <p class="text-gray-500 text-xs">Overall Grade</p>
+                                    <p class="font-bold text-lg text-blue-600">A</p>
+                                </div>
+                                <div class="bg-gray-50 p-2 rounded">
+                                    <p class="text-gray-500 text-xs">Attendance</p>
+                                    <p class="font-bold text-lg text-green-600">92%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                width: '600px',
+                showConfirmButton: false,
+                showCloseButton: true
+            });
+        }
+
+        // 2. TEACHER MODULES
+        
+        // --- Attendance ---
+        function renderTeacherAttendance(container) {
+            const students = DB.get(DB_KEYS.USERS).filter(u => u.role === 'student');
+            
+            container.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Smart Attendance</h2>
+                        <p class="text-sm text-gray-500">Marking absent students will trigger SMS alerts.</p>
+                    </div>
+                    <button onclick="submitAttendance()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition shadow-sm">
+                        <i class="fas fa-save mr-2"></i> Save & Notify
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Roll No</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="attendance-list">
+                            ${students.map((s, index) => `
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${s.roll || '10'+(index+1)}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${s.name}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <div class="flex justify-center gap-4">
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="radio" name="att_${s.id}" value="present" checked class="text-blue-600 focus:ring-blue-500">
+                                                <span class="text-sm text-gray-700">Present</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="radio" name="att_${s.id}" value="absent" class="text-red-600 focus:ring-red-500">
+                                                <span class="text-sm text-red-600 font-medium">Absent</span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function submitAttendance() {
+            const inputs = document.querySelectorAll('input[type="radio"]:checked');
+            let absentCount = 0;
+            inputs.forEach(input => {
+                if (input.value === 'absent') {
+                    absentCount++;
+                    // Simulate SMS trigger logic
+                    const studentId = input.name.split('_')[1];
+                    const student = DB.get(DB_KEYS.USERS).find(u => u.id == studentId);
+                    if (student) {
+                        setTimeout(() => {
+                            sendSMS(student.parentPhone, `ALERT: Your child ${student.name} is marked Absent today. Please contact school.`);
+                        }, 1000 * absentCount); // Stagger alerts slightly
+                    }
+                }
+            });
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Attendance Saved',
+                text: `${absentCount} Absent SMS notifications queued.`,
+                timer: 2000
+            });
+        }
+
+        // --- Fee Collection Workflow ---
+        function renderTeacherFeeCollection(container) {
+            container.innerHTML = `
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Fee Collection Portal</h2>
+                    <p class="text-sm text-gray-500">Search student to view pending demands.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                    <div class="flex gap-4">
+                        <input type="text" id="student-search" placeholder="Enter Student Name or Roll..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <button onclick="searchFees()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">Search</button>
+                    </div>
+                </div>
+
+                <div id="fee-results" class="grid gap-4">
+                    <!-- Results injected here -->
+                </div>
+            `;
+        }
+
+        function searchFees() {
+            const query = document.getElementById('student-search').value.toLowerCase();
+            const students = DB.get(DB_KEYS.USERS).filter(u => u.role === 'student' && (u.name.toLowerCase().includes(query) || (u.roll && u.roll.includes(query))));
+            
+            const resultsContainer = document.getElementById('fee-results');
+            resultsContainer.innerHTML = '';
+
+            if (students.length === 0) {
+                resultsContainer.innerHTML = '<p class="text-center text-gray-500">No students found.</p>';
+                return;
+            }
+
+            students.forEach(student => {
+                const invoices = DB.get(DB_KEYS.INVOICES).filter(i => i.studentId == student.id);
+                const unpaid = invoices.filter(i => i.status === 'Unpaid');
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-xl shadow-sm border border-gray-100";
+                
+                let html = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">${student.name} <span class="text-sm font-normal text-gray-500">(Roll: ${student.roll || 'N/A'})</span></h3>
+                            <p class="text-sm text-gray-500">Parent: ${student.parentPhone}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                `;
+
+                if (unpaid.length === 0) {
+                    html += `<p class="text-green-600 font-medium"><i class="fas fa-check-circle"></i> All fees paid!</p>`;
+                } else {
+                    unpaid.forEach(inv => {
+                        html += `
+                            <div class="flex justify-between items-center bg-red-50 p-3 rounded-lg border border-red-100">
+                                <div>
+                                    <p class="font-bold text-red-700">${inv.month} Tuition</p>
+                                    <p class="text-xs text-red-500">Invoice #${inv.id}</p>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="font-bold text-gray-800">৳ ${inv.amount}</span>
+                                    <button onclick="initiateCollection('${inv.id}', '${student.name}', ${inv.amount}, '${student.parentPhone}')" class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 transition">Collect Fee</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += `</div>`;
+                card.innerHTML = html;
+                resultsContainer.appendChild(card);
+            });
+        }
+
+        async function initiateCollection(invId, studentName, amount, parentPhone) {
+            const { value: paymentDetails } = await Swal.fire({
+                title: 'Collect Fee',
+                html: `
+                    <div class="text-left mb-4">
+                        <p class="text-sm text-gray-600">Collecting <strong>৳ ${amount}</strong> for <strong>${studentName}</strong></p>
+                        <p class="text-xs text-gray-400">Invoice: ${invId}</p>
+                    </div>
+                    
+                    <div class="flex gap-4 mb-4 justify-center">
+                        <label class="cursor-pointer border rounded p-2 hover:bg-blue-50 has-[:checked]:bg-blue-100 has-[:checked]:border-blue-500">
+                            <input type="radio" name="pay_mode" value="Cash" checked onchange="toggleTrxInput(false)">
+                            <div class="text-center mt-1"><i class="fas fa-money-bill text-green-600"></i><br><span class="text-xs">Cash</span></div>
+                        </label>
+                        <label class="cursor-pointer border rounded p-2 hover:bg-blue-50 has-[:checked]:bg-blue-100 has-[:checked]:border-blue-500">
+                            <input type="radio" name="pay_mode" value="bKash" onchange="toggleTrxInput(true)">
+                            <div class="text-center mt-1"><i class="fas fa-mobile-alt text-pink-600"></i><br><span class="text-xs">bKash/Nagad</span></div>
+                        </label>
+                    </div>
+
+                    <div id="trx-container" class="hidden">
+                        <input id="swal-trx" class="swal2-input" placeholder="Transaction ID (e.g. 8JSH42K)">
+                        <input id="swal-sender" class="swal2-input" placeholder="Sender Number">
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Mark as Paid',
+                preConfirm: () => {
+                    const mode = document.querySelector('input[name="pay_mode"]:checked').value;
+                    const trx = document.getElementById('swal-trx').value;
+                    if (mode !== 'Cash' && !trx) {
+                        Swal.showValidationMessage('Transaction ID is required for Mobile Banking');
+                    }
+                    return { mode, trx };
+                }
+            });
+
+            if (paymentDetails) {
+                // 1. Update DB
+                const invoices = DB.get(DB_KEYS.INVOICES);
+                const invIndex = invoices.findIndex(i => i.id === invId);
+                if (invIndex > -1) {
+                    invoices[invIndex].status = 'Paid';
+                    invoices[invIndex].paidDate = new Date().toISOString().split('T')[0];
+                    invoices[invIndex].paymentMode = paymentDetails.mode;
+                    invoices[invIndex].trxId = paymentDetails.trx || 'N/A';
+                    DB.set(DB_KEYS.INVOICES, invoices);
+                }
+
+                // 2. Generate PDF
+                generateInvoicePDF(invoices[invIndex], studentName);
+
+                // 3. Smart Notification
+                sendSMS(parentPhone, `Received ${amount} BDT for ${studentName}. Receipt #${invId} generated. Trx: ${paymentDetails.mode}. Thank you.`);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Payment Recorded!',
+                    text: 'Invoice downloaded & SMS sent to parent.',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+
+                searchFees(); // Refresh UI
+            }
+        }
+
+        // Helper to toggle TRX input in SweetAlert
+        window.toggleTrxInput = (show) => {
+            const el = document.getElementById('trx-container');
+            if(show) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        };
+
+        // --- Mock PDF Generator ---
+        function generateInvoicePDF(invoice, studentName) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(22);
+            doc.text("EduSmart Institute", 105, 20, null, null, "center");
+            
+            doc.setFontSize(16);
+            doc.text("Payment Receipt", 105, 30, null, null, "center");
+
+            doc.setFontSize(12);
+            doc.text(`Invoice #: ${invoice.id}`, 20, 50);
+            doc.text(`Date: ${invoice.paidDate}`, 150, 50);
+            
+            doc.line(20, 55, 190, 55);
+
+            doc.text(`Student Name: ${studentName}`, 20, 70);
+            doc.text(`Fee Type: Monthly Tuition (${invoice.month})`, 20, 80);
+            doc.text(`Payment Mode: ${invoice.paymentMode}`, 20, 90);
+            if(invoice.trxId !== 'N/A') {
+                doc.text(`Trx ID: ${invoice.trxId}`, 20, 100);
+            }
+
+            doc.setFontSize(16);
+            doc.text(`Total Amount Paid: ${invoice.amount} BDT`, 20, 120);
+
+            doc.setFontSize(10);
+            doc.text("Thank you for your payment.", 105, 140, null, null, "center");
+            doc.text("Generated by EduSmart System", 105, 145, null, null, "center");
+
+            doc.save(`Receipt_${invoice.id}.pdf`);
+        }
+
+        // --- SMS Simulation ---
+        function sendSMS(phone, message) {
+            // In a real app, this calls an API. Here we use a Toast.
+            console.log(`[SMS Gateway] To: ${phone} | Msg: ${message}`);
+            
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: 'info',
+                title: 'SMS Sent',
+                text: `To ${phone}: "${message}"`
+            });
+        }
+        
+        // --- Teacher Content/Results Stubs ---
+        function renderTeacherResults(container) {
+            const students = DB.get(DB_KEYS.USERS).filter(u => u.role === 'student');
+            
+            container.innerHTML = `
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Results Publishing</h2>
+                    <p class="text-sm text-gray-500">Input marks here. They will automatically visualize on the student's dashboard.</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-6">
+                    <div class="mb-4 grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Exam Name</label>
+                            <select class="w-full p-2 border rounded" id="exam-select">
+                                <option value="Mid Term Exam">Mid Term Exam</option>
+                                <option value="Final Exam">Final Exam</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Class</label>
+                            <select class="w-full p-2 border rounded" id="class-select">
+                                <option value="C6">Class 6</option>
+                                <option value="C7">Class 7</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                            <select class="w-full p-2 border rounded" id="subject-select">
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="English">English</option>
+                                <option value="Science">Science</option>
+                                <option value="History">History</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table class="min-w-full divide-y divide-gray-200 mb-6">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marks (Out of 100)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            ${students.map(s => `
+                                <tr>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                                        ${s.name}
+                                        <input type="hidden" name="student_id" value="${s.id}">
+                                    </td>
+                                    <td class="px-6 py-4"><input type="number" name="student_marks" class="border rounded p-1 w-20" placeholder="00" min="0" max="100"></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <button onclick="publishResults()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Publish & Notify Parents</button>
+                </div>
+            `;
+        }
+
+        function publishResults() {
+             const exam = document.getElementById('exam-select').value;
+             const subject = document.getElementById('subject-select').value;
+             
+             // Gather data
+             const inputs = document.querySelectorAll('input[name="student_marks"]');
+             const ids = document.querySelectorAll('input[name="student_id"]');
+             
+             const newResults = [];
+             let filledCount = 0;
+
+             inputs.forEach((input, index) => {
+                 if(input.value) {
+                     filledCount++;
+                     newResults.push({
+                         id: Date.now() + index,
+                         studentId: parseInt(ids[index].value),
+                         exam: exam,
+                         subject: subject,
+                         marks: parseInt(input.value)
+                     });
+                 }
+             });
+
+             if(filledCount === 0) {
+                 return Swal.fire('Warning', 'Please enter marks for at least one student.', 'warning');
+             }
+
+             Swal.fire({
+                title: 'Publishing...',
+                timer: 1500,
+                didOpen: () => Swal.showLoading()
+             }).then(() => {
+                 // Save to DB
+                 const existingResults = DB.get(DB_KEYS.RESULTS);
+                 
+                 // Remove old results for same exam/subject/student to avoid dupes
+                 const filteredResults = existingResults.filter(r => !(r.exam === exam && r.subject === subject && newResults.some(nr => nr.studentId === r.studentId)));
+                 
+                 DB.set(DB_KEYS.RESULTS, [...filteredResults, ...newResults]);
+
+                 // Simulate SMS
+                 newResults.forEach((r, i) => {
+                     const s = DB.get(DB_KEYS.USERS).find(u => u.id == r.studentId);
+                     if(s) {
+                        setTimeout(() => {
+                            sendSMS(s.parentPhone, `RESULT: ${s.name} scored ${r.marks}% in ${subject} (${exam}). Check portal.`);
+                        }, i * 300);
+                     }
+                 });
+                 
+                 Swal.fire('Success', 'Results published, Graphs updated, and SMS alerts sent!', 'success');
+             });
+        }
+
+        function renderTeacherContent(container) {
+             container.innerHTML = `
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Assignments & Notes</h2>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 max-w-2xl">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Title</label>
+                            <input type="text" id="content-title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" placeholder="e.g. Math Homework Ch-5">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">File (PDF/Img)</label>
+                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                <div class="space-y-1 text-center">
+                                    <i class="fas fa-file-upload text-gray-400 text-3xl"></i>
+                                    <div class="text-sm text-gray-600">
+                                        <label class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
+                                            <span>Upload a file</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="uploadContent()" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload Assignment</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function uploadContent() {
+            const title = document.getElementById('content-title').value;
+            if(!title) return Swal.fire('Error', 'Please enter a title', 'error');
+            
+            // Mock Save
+            let assignments = JSON.parse(localStorage.getItem('edusmart_assignments') || '[]');
+            assignments.push({ title, date: new Date().toLocaleDateString(), author: currentUser.name });
+            localStorage.setItem('edusmart_assignments', JSON.stringify(assignments));
+            
+            Swal.fire('Uploaded', 'Content is now visible to students.', 'success');
+        }
+
+
+        // 3. STUDENT MODULES
+        function renderStudentDashboard(container) {
+            const user = JSON.parse(sessionStorage.getItem('currentUser'));
+            const invoices = DB.get(DB_KEYS.INVOICES).filter(i => i.studentId == user.id);
+            const unpaid = invoices.filter(i => i.status === 'Unpaid').length;
+            const assignments = JSON.parse(localStorage.getItem('edusmart_assignments') || '[]');
+            
+            const assignmentsHtml = assignments.length > 0 ? assignments.map(a => `
+                <li class="flex justify-between items-center p-2 hover:bg-gray-50 rounded border-b last:border-0 border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fas fa-book"></i></div>
+                        <div>
+                            <p class="font-medium text-sm text-gray-900">${a.title}</p>
+                            <p class="text-xs text-gray-500">By ${a.author} • ${a.date}</p>
+                        </div>
+                    </div>
+                    <button class="text-blue-600 hover:text-blue-800 text-xs font-medium border border-blue-200 px-2 py-1 rounded">Download</button>
+                </li>
+            `).join('') : '<p class="text-gray-400 text-sm text-center py-2">No new assignments.</p>';
+
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Welcome, ${user.name}!</h2>
+                
+                <!-- Stats Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                     <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg">
+                        <p class="text-blue-100">Attendance</p>
+                        <h3 class="text-3xl font-bold">92%</h3>
+                        <p class="text-xs mt-2 text-blue-100">Present: 24 | Absent: 2</p>
+                     </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <p class="text-gray-500">Payment Status</p>
+                        <h3 class="text-2xl font-bold ${unpaid > 0 ? 'text-red-500' : 'text-green-500'}">
+                            ${unpaid > 0 ? unpaid + ' Unpaid Invoices' : 'All Clear'}
+                        </h3>
+                        <button onclick="navigate('student-payments')" class="text-sm text-blue-600 mt-2 hover:underline">View Details</button>
+                     </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <p class="text-gray-500">Notice Board</p>
+                        <ul class="mt-2 space-y-2 text-sm">
+                            <li class="flex items-start gap-2"><i class="fas fa-bullhorn text-orange-500 mt-1"></i> <span>School closed tomorrow (Rain).</span></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-calendar-alt text-blue-500 mt-1"></i> <span>Final exams start Dec 10.</span></li>
+                        </ul>
+                     </div>
+                </div>
+
+                <!-- Academic Performance Chart -->
+                <div class="mb-8">
+                    <h3 class="font-bold text-lg mb-4">Academic Performance Analytics</h3>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <canvas id="performanceChart" height="100"></canvas>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                     <h3 class="font-bold text-lg mb-4">New Assignments</h3>
+                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <ul id="student-assignments-list" class="space-y-3">
+                            ${assignmentsHtml}
+                        </ul>
+                     </div>
+                </div>
+
+                <h3 class="font-bold text-lg mb-4">Today's Routine</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    ${['English', 'Math', 'Physics', 'History'].map((sub, i) => `
+                        <div class="bg-white p-4 rounded-lg border border-gray-100 shadow-sm text-center">
+                            <p class="text-xs text-gray-400">10:00 AM</p>
+                            <p class="font-bold text-gray-800 my-1">${sub}</p>
+                            <p class="text-xs text-blue-500">Room 30${i+1}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            // Initialize Chart after DOM is ready
+            setTimeout(() => initStudentChart(user.id), 100);
+        }
+
+        function initStudentChart(studentId) {
+            const results = DB.get(DB_KEYS.RESULTS).filter(r => r.studentId === studentId);
+            
+            // Group by Exam or Subject? Let's show Subject performance for the latest exam
+            // Or just show all available marks
+            
+            // Let's filter for "Mid Term Exam" as default or just show all
+            const subjects = results.map(r => r.subject);
+            const marks = results.map(r => r.marks);
+            
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: subjects.length ? subjects : ['No Data'],
+                    datasets: [{
+                        label: 'Marks Obtained',
+                        data: marks.length ? marks : [0],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.5)',
+                            'rgba(16, 185, 129, 0.5)', 
+                            'rgba(245, 158, 11, 0.5)',
+                            'rgba(139, 92, 246, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgb(59, 130, 246)',
+                            'rgb(16, 185, 129)',
+                            'rgb(245, 158, 11)',
+                            'rgb(139, 92, 246)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Latest Exam Results'
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderStudentTeachers(container) {
+            const teachers = DB.get(DB_KEYS.USERS).filter(u => u.role === 'teacher');
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">My Teachers</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    ${teachers.map(t => `
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                            <div class="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-2xl text-blue-600 mb-4 font-bold">
+                                ${t.name.charAt(0)}
+                            </div>
+                            <h3 class="font-bold text-lg">${t.name}</h3>
+                            <p class="text-gray-500 text-sm mb-4">Mathematics</p>
+                            <div class="flex gap-2 w-full">
+                                <a href="tel:${t.phone}" class="flex-1 bg-green-50 text-green-600 py-2 rounded hover:bg-green-100 transition"><i class="fas fa-phone"></i> Call</a>
+                                <a href="mailto:${t.email}" class="flex-1 bg-blue-50 text-blue-600 py-2 rounded hover:bg-blue-100 transition"><i class="fas fa-envelope"></i> Email</a>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderStudentPayments(container) {
+            const user = JSON.parse(sessionStorage.getItem('currentUser'));
+            const invoices = DB.get(DB_KEYS.INVOICES).filter(i => i.studentId == user.id);
+            
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Payment History</h2>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            ${invoices.map(inv => `
+                                <tr>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">#${inv.id}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">${inv.month}</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-gray-800">৳ ${inv.amount}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${inv.status === 'Paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                            ${inv.status}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        ${inv.status === 'Paid' ? 
+                                            `<button onclick='generateInvoicePDF(${JSON.stringify(inv)}, "${user.name}")' class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-download"></i> Receipt</button>` 
+                                            : '<span class="text-xs text-gray-400">Pay at Office</span>'}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        function renderStudentLibrary(container) {
+             container.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Library Search</h2>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <input type="text" placeholder="Search book title..." class="w-full p-3 border border-gray-300 rounded-lg mb-4">
+                    <div class="space-y-4">
+                        <div class="flex justify-between p-4 border rounded hover:bg-gray-50">
+                            <span class="font-medium">Intro to Physics</span>
+                            <span class="text-green-600 text-sm font-bold">Available</span>
+                        </div>
+                        <div class="flex justify-between p-4 border rounded hover:bg-gray-50">
+                            <span class="font-medium">Advanced Mathematics</span>
+                            <span class="text-red-500 text-sm font-bold">Checked Out</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        
+        // --- Slide Modules ---
+        function renderTeacherSlides(container) {
+            container.innerHTML = `
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Upload Subject Slides</h2>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 max-w-2xl">
+                    <form onsubmit="handleSlideUpload(event)" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Class</label>
+                                <select id="slide-class" class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm">
+                                    <option value="C6">Class 6</option>
+                                    <option value="C7">Class 7</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Subject</label>
+                                <select id="slide-subject" class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm">
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="English">English</option>
+                                    <option value="Science">Science</option>
+                                    <option value="History">History</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Title / Chapter Name</label>
+                            <input type="text" id="slide-title" required class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm" placeholder="e.g. Algebra Chapter 1">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">File Link / URL</label>
+                            <input type="text" id="slide-link" class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm" placeholder="Paste Google Drive/PDF link">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Upload Slide</button>
+                    </form>
+                </div>
+            `;
+        }
+
+        function handleSlideUpload(e) {
+            e.preventDefault();
+            const slides = DB.get(DB_KEYS.SLIDES);
+            const newSlide = {
+                id: Date.now(),
+                classId: document.getElementById('slide-class').value,
+                subject: document.getElementById('slide-subject').value,
+                title: document.getElementById('slide-title').value,
+                link: document.getElementById('slide-link').value || '#',
+                date: new Date().toLocaleDateString(),
+                teacher: currentUser.name
+            };
+            slides.push(newSlide);
+            DB.set(DB_KEYS.SLIDES, slides);
+            Swal.fire('Success', 'Slide uploaded successfully', 'success');
+            // Reset form
+            document.getElementById('slide-title').value = '';
+            document.getElementById('slide-link').value = '';
+        }
+
+        function renderStudentSlides(container) {
+            const user = JSON.parse(sessionStorage.getItem('currentUser'));
+            const userClass = user.classId || 'C6'; // Default if missing
+            const allSlides = DB.get(DB_KEYS.SLIDES).filter(s => s.classId === userClass);
+            
+            // Get unique subjects
+            const subjects = [...new Set(allSlides.map(s => s.subject))];
+
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Subject Slides <span class="text-sm font-normal text-gray-500">(Class ${userClass === 'C6' ? '6' : '7'})</span></h2>
+                
+                ${subjects.length === 0 ? '<p class="text-gray-500">No slides available yet.</p>' : `
+                <div class="flex gap-2 overflow-x-auto pb-4 mb-4" id="subject-tabs">
+                    <button onclick="filterSlides('All')" class="px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium transition shadow-sm slide-tab">All</button>
+                    ${subjects.map(sub => `
+                        <button onclick="filterSlides('${sub}')" class="px-4 py-2 bg-white text-gray-600 hover:bg-gray-50 rounded-full text-sm font-medium border border-gray-200 transition slide-tab">${sub}</button>
+                    `).join('')}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="slides-grid">
+                    ${renderSlideCards(allSlides)}
+                </div>
+                `}
+            `;
+            
+            // Expose filter function globally so HTML can call it
+            window.filterSlides = (subject) => {
+                // Update tabs
+                document.querySelectorAll('.slide-tab').forEach(btn => {
+                    if(btn.innerText === subject || (subject === 'All' && btn.innerText === 'All')) {
+                        btn.classList.remove('bg-white', 'text-gray-600', 'border');
+                        btn.classList.add('bg-blue-600', 'text-white');
+                    } else {
+                        btn.classList.add('bg-white', 'text-gray-600', 'border');
+                        btn.classList.remove('bg-blue-600', 'text-white');
+                    }
+                });
+
+                const filtered = subject === 'All' ? allSlides : allSlides.filter(s => s.subject === subject);
+                document.getElementById('slides-grid').innerHTML = renderSlideCards(filtered);
+            };
+        }
+
+        function renderSlideCards(slides) {
+            if(slides.length === 0) return '<p class="text-gray-400 col-span-full">No slides found.</p>';
+            return slides.map(s => `
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition group">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="bg-blue-50 text-blue-600 text-xs px-2 py-1 rounded font-semibold uppercase tracking-wide">${s.subject}</span>
+                        <i class="fas fa-file-powerpoint text-orange-500 text-xl group-hover:scale-110 transition-transform"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-1 line-clamp-2">${s.title}</h3>
+                    <p class="text-xs text-gray-400 mb-4">Posted by ${s.teacher} • ${s.date}</p>
+                    <a href="${s.link}" target="_blank" class="block w-full text-center py-2 border border-blue-100 text-blue-600 rounded hover:bg-blue-50 transition text-sm font-medium">
+                        View Slide
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        // --- Utils ---
+        const today = new Date();
+        document.getElementById('current-date').innerText = today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
+        // Mobile Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+        
+        toggleBtn.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                // Mobile behavior (slide in/out)
+                sidebar.classList.toggle('-translate-x-full');
+                sidebar.classList.toggle('absolute');
+                sidebar.classList.toggle('z-20');
+                sidebar.classList.toggle('h-full');
+            } else {
+                // Desktop behavior (collapse)
+                if(sidebar.style.width === '0px') {
+                    sidebar.style.width = '256px';
+                    sidebar.classList.remove('p-0');
+                    sidebar.querySelectorAll('*').forEach(el => el.style.opacity = '1');
+                } else {
+                    sidebar.style.width = '0px';
+                    sidebar.classList.add('p-0');
+                    sidebar.querySelectorAll('*').forEach(el => el.style.opacity = '0');
+                }
+            }
+        });
+
+        // Check session on load
+        const savedUser = sessionStorage.getItem('currentUser');
+        if (savedUser) {
+            login(JSON.parse(savedUser));
+        }
+
+    </script>
+</body>
+</html>
